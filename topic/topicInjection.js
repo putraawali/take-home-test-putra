@@ -30,98 +30,105 @@ const TopicProject = ({
     deleteTopic: deleteTopicUsecase({ deleteTopic: deleteTopicRepository }),
 });
 
-const topicInjection = TopicProject({
-    createTopicRepository: createTopicRepository({ db, redis }),
-    getTopicByIdRepository: getTopicByIdRepository({ db }),
-    getAllTopicRepository: getAllTopicRepository({ db, redis }),
-    updatedTopicRepository: updatedTopicRepository({ db, redis }),
-    deleteTopicRepository: deleteTopicRepository({ db, redis }),
-});
-
-topicRouter
-    .route("/")
-    .get(async (_, res) => {
-        try {
-            let data = await topicInjection.getAllTopic();
-            res.status(200).json(data);
-        } catch (error) {
-            res.status(500).json(error);
-        }
-    })
-    .post(async (req, res) => {
-        try {
-            const { topic_name } = req.body;
-            if (!topic_name) {
-                res.status(400).json({
-                    success: false,
-                    message: "Field `topic_name` is mandatory",
-                });
-            } else {
-                let response = await topicInjection.createTopic({
-                    topic_name,
-                });
-                res.status(201).json(response);
-            }
-        } catch (error) {
-            res.status(500).json(error);
-        }
+const TopicInjection = ({ db, redis }) => {
+    const topicInjection = TopicProject({
+        createTopicRepository: createTopicRepository({ db, redis }),
+        getTopicByIdRepository: getTopicByIdRepository({ db }),
+        getAllTopicRepository: getAllTopicRepository({ db, redis }),
+        updatedTopicRepository: updatedTopicRepository({ db, redis }),
+        deleteTopicRepository: deleteTopicRepository({ db, redis }),
     });
 
-topicRouter
-    .route("/:id")
-    .get(async (req, res) => {
-        try {
-            const { id } = req.params;
-            if (!id) {
-                res.status(400).json({
-                    success: false,
-                    message: "Last sub url must be topic id",
-                });
-            } else {
-                let data = await topicInjection.getTopicById({ id });
+    topicRouter
+        .route("/")
+        .get(async (_, res) => {
+            try {
+                let data = await topicInjection.getAllTopic();
                 res.status(200).json(data);
+            } catch (error) {
+                res.status(500).json(error);
             }
-        } catch (error) {
-            res.status(500).json(error);
-        }
-    })
-    .put(async (req, res) => {
-        try {
-            const { id } = req.params;
-            const { topic_name } = req.body;
-            if (!id) {
-                res.status(400).json({
-                    success: false,
-                    message: "Last sub url must be topic id",
-                });
-            } else if (!topic_name) {
-                res.status(400).json({
-                    success: false,
-                    message: "Field `topic_name` is mandatory",
-                });
-            } else {
-                let data = await topicInjection.updateTopic({ id, topic_name });
-                res.status(200).json(data);
+        })
+        .post(async (req, res) => {
+            try {
+                const { topic_name } = req.body;
+                if (!topic_name) {
+                    res.status(400).json({
+                        success: false,
+                        message: "Field `topic_name` is mandatory",
+                    });
+                } else {
+                    let response = await topicInjection.createTopic({
+                        topic_name,
+                    });
+                    res.status(201).json(response);
+                }
+            } catch (error) {
+                res.status(500).json(error);
             }
-        } catch (error) {
-            res.status(500).json(error);
-        }
-    })
-    .delete(async (req, res) => {
-        try {
-            const { id } = req.params;
-            if (!id) {
-                res.status(400).json({
-                    success: false,
-                    message: "Last sub url must be topic id",
-                });
-            } else {
-                let data = await topicInjection.deleteTopic({ id });
-                res.status(200).json(data);
-            }
-        } catch (error) {
-            res.status(500).json(error);
-        }
-    });
+        });
 
-module.exports = { topicRouter };
+    topicRouter
+        .route("/:id")
+        .get(async (req, res) => {
+            try {
+                const { id } = req.params;
+                if (!id) {
+                    res.status(400).json({
+                        success: false,
+                        message: "Last sub url must be topic id",
+                    });
+                } else {
+                    let data = await topicInjection.getTopicById({ id });
+                    res.status(200).json(data);
+                }
+            } catch (error) {
+                res.status(500).json(error);
+            }
+        })
+        .put(async (req, res) => {
+            try {
+                const { id } = req.params;
+                const { topic_name } = req.body;
+                if (!id) {
+                    res.status(400).json({
+                        success: false,
+                        message: "Last sub url must be topic id",
+                    });
+                } else if (!topic_name) {
+                    res.status(400).json({
+                        success: false,
+                        message: "Field `topic_name` is mandatory",
+                    });
+                } else {
+                    let data = await topicInjection.updateTopic({
+                        id,
+                        topic_name,
+                    });
+                    res.status(200).json(data);
+                }
+            } catch (error) {
+                res.status(500).json(error);
+            }
+        })
+        .delete(async (req, res) => {
+            try {
+                const { id } = req.params;
+                if (!id) {
+                    res.status(400).json({
+                        success: false,
+                        message: "Last sub url must be topic id",
+                    });
+                } else {
+                    let data = await topicInjection.deleteTopic({ id });
+                    res.status(200).json(data);
+                }
+            } catch (error) {
+                res.status(500).json(error);
+            }
+        });
+
+    return topicRouter;
+};
+
+module.exports = { TopicInjection, TopicProject };
